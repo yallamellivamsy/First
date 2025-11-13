@@ -15,13 +15,6 @@ fun CategoriesScreen() {
 }
 
 @Composable
-fun CartScreen() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("🛒 Cart Screen")
-    }
-}
-
-@Composable
 fun OrdersScreen() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text("📜 Orders Screen")

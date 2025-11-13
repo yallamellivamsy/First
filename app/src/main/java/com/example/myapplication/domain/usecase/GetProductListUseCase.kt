@@ -8,4 +8,5 @@ class GetProductListUseCase @Inject constructor(
     private val repository: ProductRepository
 ) {
     suspend operator fun invoke(): List<Product> = repository.getProducts()
+    suspend fun getPopularProducts(): List<Product> = repository.getPopularProducts()
 }
