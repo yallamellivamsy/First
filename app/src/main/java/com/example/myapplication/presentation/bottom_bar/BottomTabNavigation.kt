@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,17 +22,29 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.myapplication.presentation.cart_page.CartScreen
+import com.example.myapplication.presentation.cart_page.CartViewModel
 import com.example.myapplication.presentation.home_page.HomeScreen
+import com.example.myapplication.presentation.productdetailpage.ProductDetailScreen
 import com.example.myapplication.presentation.productlist.ProductListScreen
+import com.example.myapplication.presentation.productlist.ProductListViewModel
 
 @Composable
-fun BottomTabNavigation() {
+fun BottomTabNavigation(
+    viewModel: ProductListViewModel = hiltViewModel()
+) {
     val navController = rememberNavController()
+
+    val products by viewModel.productList.collectAsState()
+    val popularProducts by viewModel.popularProductList.collectAsState()
+
+    val cartViewModel: CartViewModel = hiltViewModel()
+
     val items = listOf(
         BottomNavItem.Home,
-        BottomNavItem.Categories,
+        BottomNavItem.Shop,
         BottomNavItem.Cart,
-        BottomNavItem.Orders,
+        BottomNavItem.Favourites,
         BottomNavItem.Profile
     )
 
@@ -67,9 +80,15 @@ fun BottomTabNavigation() {
         ) {
 
             composable(BottomNavItem.Home.route) {
-                HomeScreen(onCategoryClick = { category ->
-                    navController.navigate("home/product_list/${category.name}")
-                })
+                HomeScreen(
+                    onCategoryClick = { category ->
+                        navController.navigate("home/product_list/${category.name}")
+                    },
+                    popularProducts = popularProducts,
+                    onPopularClick = { product ->
+                        navController.navigate("home/product_detail/${product.id}")
+                    }
+                )
             }
 
             composable(
@@ -77,11 +96,36 @@ fun BottomTabNavigation() {
                 arguments = listOf(navArgument("category") { type = NavType.StringType })
             ) { backStackEntry ->
                 val category = backStackEntry.arguments?.getString("category") ?: ""
-                ProductListScreen()
+                ProductListScreen(
+                    products = products,
+                    onProductClick = { product ->
+                        navController.navigate("home/product_detail/${product.id}")
+                    },
+                    navController,
+                    cartViewModel
+                )
             }
-            composable(BottomNavItem.Categories.route) { CategoriesScreen() }
-            composable(BottomNavItem.Cart.route) { CartScreen() }
-            composable(BottomNavItem.Orders.route) { OrdersScreen() }
+
+            composable(
+                route = "home/product_detail/{productId}",
+                arguments = listOf(navArgument("productId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val productId = backStackEntry.arguments?.getString("productId")
+                val product = products.firstOrNull { it.id == productId }
+
+                product?.let {
+                    ProductDetailScreen(
+                        product = it,
+                        onAddToCart = { /*viewModel.addToCart(it)*/ }, // optional
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+            }
+
+
+            composable(BottomNavItem.Favourites.route) { CategoriesScreen() }
+            composable(BottomNavItem.Cart.route) { CartScreen(cartViewModel) }
+            composable(BottomNavItem.Shop.route) { OrdersScreen() }
             composable(BottomNavItem.Profile.route) { ProfileScreen() }
         }
     }

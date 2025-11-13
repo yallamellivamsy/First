@@ -23,11 +23,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.myapplication.data.model.Product
-import androidx.compose.foundation.lazy.items
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.compose.ui.platform.LocalContext
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -41,34 +40,35 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.example.myapplication.presentation.cart_page.CartViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductListScreen(viewModel: ProductListViewModel = hiltViewModel()) {
-    val products by viewModel.productList.collectAsState()
+fun ProductListScreen(
+    products: List<Product>,
+    onProductClick: (Product) -> Unit,
+    navController: NavHostController,
+    cartViewModel: CartViewModel
+) {
+
+    //val parentEntry = remember { navController.getBackStackEntry("root") }
+    //val cartViewModel: CartViewModel = hiltViewModel(parentEntry)
+
 
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Our Products") })
         }
     ) { padding ->
-//        LazyColumn(contentPadding = padding) {
-//            items(products) { product ->
-//                //ProductItem(product)
-//                ProductItem(
-//                    product = product,
-//                    onAddToCart = { /* handle add */ },
-//                    onIncrease = { /* handle increase */ },
-//                    onDecrease = { /* handle decrease */ }
-//                )
-//            }
-//        }
-
         LazyVerticalGrid(
             columns = GridCells.Fixed(2), // ✅ 2 items per row
             contentPadding = PaddingValues(8.dp), // Optional padding
@@ -77,52 +77,13 @@ fun ProductListScreen(viewModel: ProductListViewModel = hiltViewModel()) {
             items(products) { product ->
                 ProductItem(
                     product = product,
-                    onAddToCart = { /* handle add */ },
-                    onIncrease = { /* handle increase */ },
-                    onDecrease = { /* handle decrease */ }
+                    onProductClick = onProductClick,
+                    onAddToCart = { p ->
+                        cartViewModel.addToCart(p)
+                    },
+                    onIncrease = { cartViewModel.addToCart(product)},
+                    onDecrease = { cartViewModel.removeFromCart(product.id) }
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun ProductItem(product: Product) {
-
-    val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(product.imageUrl)
-            .crossfade(true)
-            .listener(
-                onError = { _, error -> Log.e("Coil", "Image load failed", error.throwable) },
-                onSuccess = { _, _ -> Log.d("Coil", "Image loaded successfully") }
-            )
-            .build()
-    )
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(modifier = Modifier.padding(8.dp)) {
-
-            Image(
-                painter = painter,
-                contentDescription = product.name,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(Modifier.width(12.dp))
-
-            Column {
-                Text(product.name, fontWeight = FontWeight.Bold)
-                Text(product.description, style = MaterialTheme.typography.bodySmall)
-                Text("₹${product.price}", color = Color(0xFF388E3C))
             }
         }
     }
@@ -131,19 +92,23 @@ fun ProductItem(product: Product) {
 @Composable
 fun ProductItem(
     product: Product,
+    onProductClick: (Product) -> Unit,
     onAddToCart: (Product) -> Unit,
     onIncrease: (Product) -> Unit,
     onDecrease: (Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var quantity by remember { mutableStateOf(0) }
+    var quantity by remember { mutableIntStateOf(0) }
 
     var isFavourite by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier
             .padding(8.dp)
-            .width(160.dp),
+            .width(160.dp)
+            .clickable {
+                onProductClick(product)
+            },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {

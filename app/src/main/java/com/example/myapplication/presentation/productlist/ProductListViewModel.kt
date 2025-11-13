@@ -18,6 +18,9 @@ class ProductListViewModel @Inject constructor(
     private val _productList = MutableStateFlow<List<Product>>(emptyList())
     val productList: StateFlow<List<Product>> = _productList
 
+    private val _popularProductList = MutableStateFlow<List<Product>>(emptyList())
+    val popularProductList: StateFlow<List<Product>> = _popularProductList
+
     init {
         loadProducts()
     }
@@ -25,6 +28,7 @@ class ProductListViewModel @Inject constructor(
     private fun loadProducts() {
         viewModelScope.launch {
             _productList.value = getProductListUseCase()
+            _popularProductList.value = getProductListUseCase.getPopularProducts()
         }
     }
 }

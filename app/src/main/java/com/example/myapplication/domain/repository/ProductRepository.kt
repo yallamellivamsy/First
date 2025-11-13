@@ -4,4 +4,5 @@ import com.example.myapplication.data.model.Product
 
 interface ProductRepository {
     suspend fun getProducts(): List<Product>
+    suspend fun getPopularProducts(): List<Product>
 }

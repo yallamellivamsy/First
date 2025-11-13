@@ -15,13 +15,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.R
+import com.example.myapplication.data.model.Product
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onCategoryClick: (Category) -> Unit) {
+fun HomeScreen(onCategoryClick: (Category) -> Unit, popularProducts: List<Product>, onPopularClick: (Product) -> Unit) {
 
     val categories = listOf(
         Category("Pickles", Icons.Default.LocalDining),
@@ -32,6 +36,18 @@ fun HomeScreen(onCategoryClick: (Category) -> Unit) {
         Category("Masalas", Icons.Default.LocalFireDepartment),
         Category("Healthy", Icons.Default.Eco),
         Category("More", Icons.Default.MoreHoriz)
+    )
+
+    val recentlyViewed = listOf(
+        ImageBitmap.imageResource(id = R.mipmap.img),
+        ImageBitmap.imageResource(id = R.mipmap.img_1),
+        ImageBitmap.imageResource(id = R.mipmap.img),
+        ImageBitmap.imageResource(id = R.mipmap.img_1),
+        ImageBitmap.imageResource(id = R.mipmap.img),
+        ImageBitmap.imageResource(id = R.mipmap.img_1),
+        ImageBitmap.imageResource(id = R.mipmap.img),
+        ImageBitmap.imageResource(id = R.mipmap.img_1),
+        ImageBitmap.imageResource(id = R.mipmap.img)
     )
     Scaffold(
         topBar = {
@@ -50,16 +66,21 @@ fun HomeScreen(onCategoryClick: (Category) -> Unit) {
                 .padding(horizontal = 16.dp, vertical = 0.dp)
         ) {
             AccountSection()
-
             Spacer(Modifier.height(16.dp))
 
             SearchBarSection()
-
             Spacer(Modifier.height(16.dp))
 
             CarouselSection()
-
             Spacer(Modifier.height(24.dp))
+
+            PopularSection(popularProducts, onPopularClick)
+            Spacer(Modifier.height(0.dp))
+
+//            if(!recentlyViewed.isEmpty()){
+                RecentlyViewed(recentlyViewed)
+                Spacer(Modifier.height(0.dp))
+//            }
 
             CategoryGrid(
                 categories = categories,
