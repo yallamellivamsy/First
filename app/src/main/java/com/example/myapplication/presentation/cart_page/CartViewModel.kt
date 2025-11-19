@@ -26,6 +26,24 @@ class CartViewModel @Inject constructor() : ViewModel() {
         _cartItems.value = current
     }
 
+    fun removeFromCart(product: Product) {
+        val current = _cartItems.value.toMutableList()
+        val existing = current.find { it.product.id == product.id }
+
+        if (existing != null ) {
+            if(existing.quantity !=0){
+                val updated = existing.copy(quantity = existing.quantity - 1)
+                current[current.indexOf(existing)] = updated
+            } else{
+                removeFromCart(product.id)
+            }
+        }
+        else {
+            current.add(CartItem(product, 1))
+        }
+        _cartItems.value = current
+    }
+
     fun removeFromCart(productId: String) {
         _cartItems.value = _cartItems.value.filterNot { it.product.id == productId }
     }
