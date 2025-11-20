@@ -42,10 +42,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.myapplication.presentation.payments.PaymentResultObserver
+import com.example.myapplication.presentation.payments.PaymentViewModel
 
 @Composable
-fun CartScreen(cartViewModel: CartViewModel) {
+fun CartScreen(cartViewModel: CartViewModel, paymentViewModel: PaymentViewModel) {
     val cartItems by cartViewModel.cartItems.collectAsState()
+    var totalAmount = 0.0
 
     LazyColumn(Modifier.fillMaxSize()) {
         items(cartItems) { item ->
@@ -53,7 +56,7 @@ fun CartScreen(cartViewModel: CartViewModel) {
             //Text("${item.product.name} - Qty: ${item.quantity}")
         }
         item{
-            val totalAmount = cartItems.sumOf { it.product.price * it.quantity }
+            totalAmount = cartItems.sumOf { it.product.price * it.quantity }
 
             Text(
                 "Total: ₹$totalAmount",
@@ -74,10 +77,17 @@ fun CartScreen(cartViewModel: CartViewModel) {
             )
         }
 
+        item {
+            PaymentResultObserver(paymentViewModel)
+        }
+
+
         // Checkout button section
         item {
             Button(
-                onClick = { /* checkout logic */ },
+                onClick = {
+                    paymentViewModel.startPayment(totalAmount)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)

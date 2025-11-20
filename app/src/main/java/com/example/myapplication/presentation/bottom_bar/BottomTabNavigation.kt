@@ -25,13 +25,16 @@ import androidx.navigation.navArgument
 import com.example.myapplication.presentation.cart_page.CartScreen
 import com.example.myapplication.presentation.cart_page.CartViewModel
 import com.example.myapplication.presentation.home_page.HomeScreen
+import com.example.myapplication.presentation.payments.PaymentViewModel
 import com.example.myapplication.presentation.productdetailpage.ProductDetailScreen
 import com.example.myapplication.presentation.productlist.ProductListScreen
 import com.example.myapplication.presentation.productlist.ProductListViewModel
 
 @Composable
 fun BottomTabNavigation(
+    paymentViewModel: PaymentViewModel,
     viewModel: ProductListViewModel = hiltViewModel()
+
 ) {
     val navController = rememberNavController()
 
@@ -124,7 +127,7 @@ fun BottomTabNavigation(
 
 
             composable(BottomNavItem.Favourites.route) { CategoriesScreen() }
-            composable(BottomNavItem.Cart.route) { CartScreen(cartViewModel) }
+            composable(BottomNavItem.Cart.route) { CartScreen(cartViewModel, paymentViewModel) }
             composable(BottomNavItem.Shop.route) { OrdersScreen() }
             composable(BottomNavItem.Profile.route) { ProfileScreen() }
         }
@@ -226,6 +229,6 @@ private fun CustomFAB(navController: NavHostController, fabSize: Dp, fabColor:Co
 @Composable
 fun PreviewResponsiveBottomTabs() {
     MaterialTheme {
-        BottomTabNavigation()
+        BottomTabNavigation(paymentViewModel = hiltViewModel())
     }
 }
